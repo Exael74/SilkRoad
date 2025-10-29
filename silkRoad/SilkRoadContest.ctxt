@@ -1,0 +1,10 @@
+#BlueJ class context
+comment0.target=SilkRoadContest
+comment0.text=\r\n\ Clase\ que\ implementa\ la\ soluci\u00F3n\ al\ problema\ de\ la\ Ruta\ de\ la\ Seda\r\n\ y\ proporciona\ funcionalidades\ para\ simularlo\ visualmente.\r\n\ *\ @author\ Exael74\ (Github\ User\ for\ Stiven\ Pardo)\r\n
+comment1.params=days
+comment1.target=int[]\ solve(int[][])
+comment1.text=\r\n\ Resuelve\ el\ problema\ de\ maximizar\ las\ ganancias.\r\n\ @param\ days\ Array\ bidimensional\ con\ informaci\u00F3n\ de\ cada\ d\u00EDa\r\n\ @return\ Array\ con\ las\ m\u00E1ximas\ ganancias\ posibles\ despu\u00E9s\ de\ cada\ d\u00EDa\r\n
+comment2.params=days\ slow
+comment2.target=void\ simulate(int[][],\ boolean)
+comment2.text=\r\n\ Simula\ la\ soluci\u00F3n\ paso\ a\ paso.\r\n\ @param\ days\ Array\ bidimensional\ con\ informaci\u00F3n\ de\ cada\ d\u00EDa\r\n\ @param\ slow\ Indica\ si\ la\ simulaci\u00F3n\ debe\ ser\ lenta\ (true)\ o\ r\u00E1pida\ (false)\r\n
+numComments=3
