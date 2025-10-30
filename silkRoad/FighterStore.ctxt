@@ -1,0 +1,11 @@
+#BlueJ class context
+comment0.target=FighterStore
+comment0.text=\r\n\ Fighter\ store\ that\ only\ allows\ robots\ with\ higher\ profit\ to\ take\ tenges.\r\n\ \r\n\ @author\ Exael74\ (Github\ User\ for\ Stiven\ Pardo)\r\n\ @version\ 5.0\r\n
+comment1.params=position\ tenges
+comment1.target=FighterStore(int,\ int)
+comment1.text=\r\n\ Constructor\ for\ FighterStore.\r\n\ \r\n\ @param\ position\ store\ position\ on\ the\ route\r\n\ @param\ tenges\ initial\ amount\ of\ tenges\r\n
+comment2.params=
+comment2.target=java.lang.String\ getType()
+comment3.params=robot
+comment3.target=boolean\ canRobotTakeTenges(Robot)
+numComments=4

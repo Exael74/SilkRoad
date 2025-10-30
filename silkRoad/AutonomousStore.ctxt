@@ -1,0 +1,14 @@
+#BlueJ class context
+comment0.target=AutonomousStore
+comment0.text=\r\n\ Autonomous\ store\ that\ chooses\ its\ own\ position\ randomly.\r\n\ \r\n\ @author\ Exael74\ (Github\ User\ for\ Stiven\ Pardo)\r\n\ @version\ 5.0\r\n
+comment1.params=suggestedPosition\ tenges\ routeLength\ occupiedPositions
+comment1.target=AutonomousStore(int,\ int,\ int,\ java.util.ArrayList)
+comment1.text=\r\n\ Constructor\ for\ AutonomousStore.\r\n\ The\ store\ will\ choose\ its\ own\ position\ from\ available\ positions.\r\n\ \r\n\ @param\ suggestedPosition\ suggested\ position\ (may\ be\ ignored)\r\n\ @param\ tenges\ initial\ amount\ of\ tenges\r\n\ @param\ routeLength\ total\ length\ of\ the\ route\r\n\ @param\ occupiedPositions\ list\ of\ positions\ already\ occupied\ by\ stores\r\n
+comment2.params=suggestedPosition\ routeLength\ occupiedPositions
+comment2.target=int\ choosePosition(int,\ int,\ java.util.ArrayList)
+comment2.text=\r\n\ Chooses\ an\ available\ position\ for\ the\ store.\r\n\ \r\n\ @param\ suggestedPosition\ suggested\ position\ to\ avoid\r\n\ @param\ routeLength\ total\ route\ length\r\n\ @param\ occupiedPositions\ list\ of\ occupied\ positions\r\n\ @return\ chosen\ position\r\n
+comment3.params=
+comment3.target=java.lang.String\ getType()
+comment4.params=robot
+comment4.target=boolean\ canRobotTakeTenges(Robot)
+numComments=5

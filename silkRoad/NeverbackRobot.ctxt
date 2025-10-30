@@ -1,0 +1,15 @@
+#BlueJ class context
+comment0.target=NeverbackRobot
+comment0.text=\r\n\ Neverback\ robot\ that\ cannot\ move\ backwards.\r\n\ Takes\ all\ tenges\ from\ stores.\r\n\ \r\n\ @author\ Exael74\ (Github\ User\ for\ Stiven\ Pardo)\r\n\ @version\ 5.0\r\n
+comment1.params=position
+comment1.target=NeverbackRobot(int)
+comment1.text=\r\n\ Constructor\ for\ NeverbackRobot.\r\n\ \r\n\ @param\ position\ initial\ position\ of\ the\ robot\r\n
+comment2.params=
+comment2.target=java.lang.String\ getType()
+comment3.params=moveDistance
+comment3.target=boolean\ canMove(int)
+comment4.params=storeTenges\ distance
+comment4.target=int\ calculateProfit(int,\ int)
+comment5.params=storeTenges
+comment5.target=int\ getTengesToTake(int)
+numComments=6

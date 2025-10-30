@@ -1,27 +1,24 @@
 package silkRoad;
 
 import shapes.Circle;
-import java.util.Random;
 
 /**
- * Represents a robot that can move along the silk road route.
+ * Abstract base class representing a robot that can move along the silk road route.
+ * This class implements the common behavior for all robot types.
+ * 
  * @author Exael74 (Github User for Stiven Pardo)
+ * @version 5.0
  */
-public class Robot {
-    private int initialPosition;
-    private int currentPosition;
-    private String color;
-    private String type; // Robot type: "normal", "neverback", "tender"
-    private Circle circle;
-    private int totalProfit;
-    private int[] profitPerMove;
-    private int moveCount;
-    private boolean isBlinking;
-    private boolean isVisible;
-    
-    // Specific colors for special robot types
-    private static final String NEVERBACK_ROBOT_COLOR = "blue";
-    private static final String TENDER_ROBOT_COLOR = "green";
+public abstract class Robot {
+    protected int initialPosition;
+    protected int currentPosition;
+    protected String color;
+    protected Circle circle;
+    protected int totalProfit;
+    protected int[] profitPerMove;
+    protected int moveCount;
+    protected boolean isBlinking;
+    protected boolean isVisible;
     
     /**
      * Constructor for Robot class objects.
@@ -33,56 +30,13 @@ public class Robot {
         this.initialPosition = position;
         this.currentPosition = position;
         this.color = color;
-        this.type = "normal"; // Default is normal type
         
         this.circle = new Circle();
-        this.circle.changeSize(15); // Robot size
+        this.circle.changeSize(15);
         this.circle.changeColor(color);
         
-        // Variable initialization
         this.totalProfit = 0;
-        this.profitPerMove = new int[100]; // Reasonable initial size
-        this.moveCount = 0;
-        this.isBlinking = false;
-        this.isVisible = false;
-    }
-    
-    /**
-     * Constructor for Robot class objects with specific type.
-     * 
-     * @param position initial position of the robot on the route
-     * @param type robot type: "normal", "neverback", "tender"
-     * @param isTypeSpecified parameter to distinguish this constructor
-     */
-    public Robot(int position, String type, boolean isTypeSpecified) {
-        this.initialPosition = position;
-        this.currentPosition = position;
-        this.type = type.toLowerCase(); // Normalize to lowercase
-        
-        // Assign color according to type
-        switch (this.type) {
-            case "neverback":
-                this.color = NEVERBACK_ROBOT_COLOR;
-                break;
-            case "tender":
-                this.color = TENDER_ROBOT_COLOR;
-                break;
-            default: // "normal" or other unknown types
-                // Assign a random color for normal robots
-                String[] availableColors = {"red", "magenta", "pink", "orange", "cyan", "black"};
-                Random random = new Random();
-                this.color = availableColors[random.nextInt(availableColors.length)];
-                this.type = "normal"; // Ensure it's normal if type is not recognized
-                break;
-        }
-        
-        this.circle = new Circle();
-        this.circle.changeSize(15); // Robot size
-        this.circle.changeColor(this.color);
-        
-        // Variable initialization
-        this.totalProfit = 0;
-        this.profitPerMove = new int[100]; // Reasonable initial size
+        this.profitPerMove = new int[100];
         this.moveCount = 0;
         this.isBlinking = false;
         this.isVisible = false;
@@ -90,26 +44,39 @@ public class Robot {
     
     /**
      * Returns the robot type.
+     * Must be implemented by subclasses.
      * 
-     * @return robot type ("normal", "neverback", "tender")
+     * @return robot type string
      */
-    public String getType() {
-        return type;
-    }
+    public abstract String getType();
     
     /**
      * Checks if a robot can move in a specific direction.
+     * Can be overridden by subclasses to implement movement restrictions.
      * 
      * @param moveDistance the movement distance (positive forward, negative backward)
      * @return true if the movement is valid for this robot type
      */
-    public boolean canMove(int moveDistance) {
-        // Neverback robots cannot move backwards
-        if ("neverback".equals(this.type) && moveDistance < 0) {
-            return false;
-        }
-        return true;
-    }
+    public abstract boolean canMove(int moveDistance);
+    
+    /**
+     * Calculates the profit this robot will obtain from collecting tenges.
+     * Can be overridden by subclasses to implement different profit calculations.
+     * 
+     * @param storeTenges the tenges available at the store
+     * @param distance the distance traveled to reach the store
+     * @return the actual profit this robot will obtain
+     */
+    public abstract int calculateProfit(int storeTenges, int distance);
+    
+    /**
+     * Returns the amount of tenges this robot will take from a store.
+     * Can be overridden by subclasses to implement different collection behaviors.
+     * 
+     * @param storeTenges the tenges available at the store
+     * @return the amount of tenges this robot will take
+     */
+    public abstract int getTengesToTake(int storeTenges);
     
     /**
      * Makes the robot visible on the canvas.
@@ -136,16 +103,13 @@ public class Robot {
     public void updateCanvasPosition(int x, int y) {
         circle.makeInvisible();
         
-        // Create a new circle to avoid problems with relative positions
         circle = new Circle();
         circle.changeSize(15);
         circle.changeColor(color);
         
-        // Move the circle to the new position (adjusting for default values)
-        circle.moveHorizontal(x - 20 + 3); // +3 to center on the square
-        circle.moveVertical(y - 15 + 3);   // +3 to center on the square
+        circle.moveHorizontal(x - 20 + 3);
+        circle.moveVertical(y - 15 + 3);
         
-        // Visibility will now be controlled externally by SilkRoad
         if (isVisible && !isBlinking) {
             circle.makeVisible();
         }
@@ -167,11 +131,6 @@ public class Robot {
      * @param position position where profit was obtained
      */
     public void addProfit(int profit, int position) {
-        // For tender robots, only take half the profit
-        if ("tender".equals(this.type)) {
-            profit = profit / 2; // Half profit
-        }
-        
         this.totalProfit += profit;
         this.profitPerMove[moveCount] = profit;
         moveCount++;
@@ -219,7 +178,6 @@ public class Robot {
      * @return array with profits for each movement
      */
     public int[] getProfitHistory() {
-        // Create an array of the exact size of movements made
         int[] history = new int[moveCount];
         System.arraycopy(profitPerMove, 0, history, 0, moveCount);
         return history;
@@ -230,7 +188,7 @@ public class Robot {
      */
     public void resetProfit() {
         this.totalProfit = 0;
-        this.profitPerMove = new int[100]; // Reasonable initial size
+        this.profitPerMove = new int[100];
         this.moveCount = 0;
     }
     
@@ -273,36 +231,6 @@ public class Robot {
         } else if (!visible) {
             circle.makeInvisible();
         }
-    }
-    
-    /**
-     * Calculates the expected benefit of moving this robot to a specific position.
-     * 
-     * @param targetPosition target position
-     * @param storeTenges tenges available at the store in that position
-     * @return expected benefit (can be negative)
-     */
-    public int calculateExpectedProfit(int targetPosition, int storeTenges) {
-        int distance = calculateDistance(initialPosition, targetPosition);
-        int profit = storeTenges - distance;
-        
-        // For tender robots, only consider half the profit
-        if ("tender".equals(this.type)) {
-            profit = profit / 2;
-        }
-        
-        return profit;
-    }
-    
-    /**
-     * Auxiliary method to calculate distance between two positions on the route.
-     * 
-     * @param length total route length
-     */
-    public int calculateDistance(int startPos, int endPos) {
-        int directDistance = Math.abs(endPos - startPos);
-        // We can't access road.getLength(), so this will have to be adjusted by SilkRoad
-        return directDistance;
     }
     
     /**

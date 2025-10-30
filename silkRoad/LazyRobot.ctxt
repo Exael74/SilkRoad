@@ -1,0 +1,15 @@
+#BlueJ class context
+comment0.target=LazyRobot
+comment0.text=\r\n\ Lazy\ robot\ that\ never\ collects\ tenges\ from\ stores.\r\n\ This\ robot\ can\ move\ but\ will\ never\ take\ any\ tenges,\ resulting\ in\ zero\ profit.\r\n\ Represented\ with\ black\ color.\r\n\ \r\n\ @author\ Exael74\ (Github\ User\ for\ Stiven\ Pardo)\r\n\ @version\ 5.0\r\n
+comment1.params=position
+comment1.target=LazyRobot(int)
+comment1.text=\r\n\ Constructor\ for\ LazyRobot.\r\n\ \r\n\ @param\ position\ initial\ position\ of\ the\ robot\r\n
+comment2.params=
+comment2.target=java.lang.String\ getType()
+comment3.params=moveDistance
+comment3.target=boolean\ canMove(int)
+comment4.params=storeTenges\ distance
+comment4.target=int\ calculateProfit(int,\ int)
+comment5.params=storeTenges
+comment5.target=int\ getTengesToTake(int)
+numComments=6

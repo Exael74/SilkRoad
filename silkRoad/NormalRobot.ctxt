@@ -1,0 +1,21 @@
+#BlueJ class context
+comment0.target=NormalRobot
+comment0.text=\r\n\ Normal\ robot\ that\ takes\ all\ tenges\ and\ can\ move\ in\ any\ direction.\r\n\ \r\n\ @author\ Exael74\ (Github\ User\ for\ Stiven\ Pardo)\r\n\ @version\ 5.0\r\n
+comment1.params=position
+comment1.target=NormalRobot(int)
+comment1.text=\r\n\ Constructor\ for\ NormalRobot.\r\n\ \r\n\ @param\ position\ initial\ position\ of\ the\ robot\r\n
+comment2.params=position\ color
+comment2.target=NormalRobot(int,\ java.lang.String)
+comment2.text=\r\n\ Constructor\ for\ NormalRobot\ with\ specific\ color.\r\n\ \r\n\ @param\ position\ initial\ position\ of\ the\ robot\r\n\ @param\ color\ specific\ color\ for\ the\ robot\r\n
+comment3.params=
+comment3.target=java.lang.String\ selectRandomColor()
+comment3.text=\r\n\ Selects\ a\ random\ color\ for\ the\ robot.\r\n\ \r\n\ @return\ a\ random\ color\ string\r\n
+comment4.params=
+comment4.target=java.lang.String\ getType()
+comment5.params=moveDistance
+comment5.target=boolean\ canMove(int)
+comment6.params=storeTenges\ distance
+comment6.target=int\ calculateProfit(int,\ int)
+comment7.params=storeTenges
+comment7.target=int\ getTengesToTake(int)
+numComments=8

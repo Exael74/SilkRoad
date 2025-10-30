@@ -452,7 +452,7 @@ public class SilkRoad {
     
     /**
      * Places a robot on the route at the specified position.
-     * The robot color is assigned automatically based on available colors.
+     * Creates a normal robot by default.
      * 
      * @param position the initial position of the robot (0 to length-1)
      */
@@ -473,12 +473,8 @@ public class SilkRoad {
                 }
             }
             
-            // Available colors for robots
-            String[] colors = {"red", "blue", "green", "black", "magenta"};
-            String color = colors[robots.size() % colors.length];
-            
-            // MODIFIED: No longer passing SilkRoad to constructor
-            Robot robot = new Robot(position, color);
+            // Create a normal robot with automatic color
+            Robot robot = new NormalRobot(position);
             robots.add(robot);
             
             // Get position on canvas and place the robot
@@ -499,7 +495,8 @@ public class SilkRoad {
             updateHighestProfitRobot();
             
             lastActionSuccessful = true;
-            lastActionMessage = "Robot with color " + color + " successfully placed at position " + position;
+            lastActionMessage = "Normal robot with color " + robot.getColor() + 
+                               " successfully placed at position " + position;
             
         } catch (NumberFormatException e) {
             lastActionSuccessful = false;
@@ -509,8 +506,7 @@ public class SilkRoad {
     
     /**
      * Moves a robot along the route.
-     * If the robot encounters a store, it collects tenges based on the
-     * store type and robot type. The profit is calculated as tenges minus distance.
+     * Uses polymorphism to handle different robot and store behaviors.
      * 
      * @param posToMove the current position of the robot to move
      * @param moveCount the number of positions to move (positive = forward, negative = backward)
@@ -537,10 +533,11 @@ public class SilkRoad {
             return;
         }
         
-        // Check if the robot can make this move (especially for neverback)
-        if ("neverback".equals(robotToMove.getType()) && moveCount < 0) {
+        // POLYMORPHISM: Check if the robot can make this move
+        if (!robotToMove.canMove(moveCount)) {
             lastActionSuccessful = false;
-            lastActionMessage = "Error: Neverback type robots cannot move backwards";
+            lastActionMessage = "Error: " + robotToMove.getType() + 
+                               " type robots cannot move backwards";
             return;
         }
         
@@ -561,7 +558,7 @@ public class SilkRoad {
             // Move the robot
             int currentPos = robotToMove.getPosition();
             int newPos = (currentPos + moveCount) % length;
-            if (newPos < 0) newPos += length; // Handle negative position
+            if (newPos < 0) newPos += length;
             
             // Update robot position
             int[] newCoords = positions.get(newPos);
@@ -575,16 +572,12 @@ public class SilkRoad {
                 robotToMove.setVisible(false);
             }
             
-            // Variable to record if it passed through a store
+            // Check if there is a store at the new position
             boolean passedStore = false;
             
-            // Check if there is a store at the new position
             for (Store store : stores) {
                 if (store.getPosition() == newPos) {
-                    // MODIFIED: Use SilkRoad method to calculate distance
                     int distanceTraveled = calculateDistance(robotToMove.getInitialPosition(), newPos);
-                    
-                    // Get store tenges
                     int storeTenges = store.getTenges();
                     
                     // Save information for undo
@@ -593,58 +586,61 @@ public class SilkRoad {
                     
                     passedStore = true;
                     
-                    // For fighter stores, check if robot has more profit than store tenges
-                    if ("fighter".equals(store.getType()) && robotToMove.getTotalProfit() <= storeTenges) {
+                    // POLYMORPHISM: Check if robot takes any tenges (lazy robots don't)
+                    int tengesToTake = robotToMove.getTengesToTake(storeTenges);
+                    
+                    // Special case: Lazy robot
+                    if ("lazy".equals(robotToMove.getType())) {
                         lastActionSuccessful = true;
-                        lastActionMessage = "Robot " + robotToMove.getColor() + " (type " + robotToMove.getType() + 
-                                         ") moved to position " + newPos + 
-                                         " but could not take tenges from fighter store (insufficient profit)";
+                        lastActionMessage = "Lazy robot " + robotToMove.getColor() + 
+                                         " moved to position " + newPos + 
+                                         " and passed through a " + store.getType() + 
+                                         " store but was too lazy to collect tenges";
                         
-                        // No tenges were taken, so no need to save info for undo
+                        lastVisitedStore = null;
+                        lastStoreOriginalTenges = 0;
+                        break;
+                    }
+                    
+                    // POLYMORPHISM: Check if robot can take tenges from this store
+                    if (!store.canRobotTakeTenges(robotToMove)) {
+                        lastActionSuccessful = true;
+                        lastActionMessage = "Robot " + robotToMove.getColor() + 
+                                         " (type " + robotToMove.getType() + 
+                                         ") moved to position " + newPos + 
+                                         " but could not take tenges from " + store.getType() + 
+                                         " store (insufficient profit)";
+                        
                         lastVisitedStore = null;
                         lastStoreOriginalTenges = 0;
                     }
-                    else if (storeTenges > 0) { // Only if store has tenges
-                        // Calculate profit: store tenges - distance traveled
-                        int newProfit = storeTenges - distanceTraveled;
+                    else if (storeTenges > 0 && tengesToTake > 0) {
+                        // POLYMORPHISM: Calculate profit using robot's method
+                        int profitCalculated = robotToMove.calculateProfit(storeTenges, distanceTraveled);
                         
-                        // Determine how many tenges the robot takes according to its type
-                        int tengesToTake = storeTenges;
-                        int actualProfit = newProfit;
-                        
-                        if ("tender".equals(robotToMove.getType())) {
-                            tengesToTake = storeTenges / 2;  // Tender robot only takes half
-                            actualProfit = newProfit / 2;
-                            
-                            // Update remaining tenges in the store
-                            store.setTenges(storeTenges - tengesToTake);
-                        } else {
-                            // Normal and neverback robots take all tenges
-                            store.setTenges(0);
-                        }
+                        // Update store tenges
+                        store.setTenges(storeTenges - tengesToTake);
                         
                         // Add to total game profit
-                        profit += actualProfit;
+                        profit += profitCalculated;
                         
-                        // Register the profit in the robot (internally adjusts for tender robots)
-                        robotToMove.addProfit(newProfit, newPos);
+                        // Register the profit in the robot
+                        robotToMove.addProfit(profitCalculated, newPos);
                         
                         lastActionSuccessful = true;
-                        if ("tender".equals(robotToMove.getType())) {
-                            lastActionMessage = "Robot " + robotToMove.getColor() + " (tender type) moved to position " + newPos + 
-                                             " and took half of tenges (" + tengesToTake + ") from store of type " + store.getType() + 
-                                             ". Profit: " + actualProfit + " tenges";
-                        } else {
-                            lastActionMessage = "Robot " + robotToMove.getColor() + " moved to position " + newPos + 
-                                             " and passed through a store of type " + store.getType() + 
-                                             ". Profit: " + actualProfit + " tenges";
-                        }
+                        lastActionMessage = "Robot " + robotToMove.getColor() + 
+                                         " (type " + robotToMove.getType() + 
+                                         ") moved to position " + newPos + 
+                                         " and took " + tengesToTake + " tenges from " + 
+                                         store.getType() + " store. Profit: " + 
+                                         profitCalculated + " tenges";
                     } else {
                         lastActionSuccessful = true;
-                        lastActionMessage = "Robot " + robotToMove.getColor() + " moved to position " + newPos + 
-                                         " and passed through a store of type " + store.getType() + ", but it was empty";
+                        lastActionMessage = "Robot " + robotToMove.getColor() + 
+                                         " moved to position " + newPos + 
+                                         " and passed through a " + store.getType() + 
+                                         " store, but it was empty";
                         
-                        // No tenges were taken, so no need to save info for undo
                         lastVisitedStore = null;
                         lastStoreOriginalTenges = 0;
                     }
@@ -655,13 +651,14 @@ public class SilkRoad {
                     // Update robot with highest profit
                     updateHighestProfitRobot();
                     
-                    break; // Exit loop once a store is found
+                    break;
                 }
             }
             
             if (!passedStore) {
                 lastActionSuccessful = true;
-                lastActionMessage = "Robot " + robotToMove.getColor() + " successfully moved from position " + 
+                lastActionMessage = "Robot " + robotToMove.getColor() + 
+                                 " successfully moved from position " + 
                                  currentPos + " to position " + newPos;
             }
             
@@ -841,6 +838,7 @@ public class SilkRoad {
     
     /**
      * Places a store on the route at the specified position.
+     * Creates a normal store by default.
      * 
      * @param position the position of the store (0 to length-1)
      * @param tenges the initial amount of tenges in the store
@@ -868,8 +866,8 @@ public class SilkRoad {
                 return;
             }
             
-            // MODIFIED: No longer passing SilkRoad to constructor
-            Store store = new Store(position, tenges);
+            // Create a normal store
+            Store store = new NormalStore(position, tenges);
             stores.add(store);
             
             // Get position on canvas and place the store
@@ -887,7 +885,8 @@ public class SilkRoad {
             updateProgressBar();
             
             lastActionSuccessful = true;
-            lastActionMessage = "Store successfully placed at position " + position + " with " + tenges + " tenges";
+            lastActionMessage = "Normal store successfully placed at position " + 
+                               position + " with " + tenges + " tenges";
             
         } catch (NumberFormatException e) {
             lastActionSuccessful = false;
@@ -1279,7 +1278,7 @@ public class SilkRoad {
     /**
      * Returns a 2D array with robot information, sorted by position.
      * Each row contains: [position, totalProfit, typeNumeric]
-     * where typeNumeric is: 0=normal, 1=neverback, 2=tender
+     * where typeNumeric is: 0=normal, 1=neverback, 2=tender, 3=lazy
      * 
      * @return 2D array with robot data [position][profit][type]
      */
@@ -1293,7 +1292,7 @@ public class SilkRoad {
         sortedRobots.sort((r1, r2) -> Integer.compare(r1.getPosition(), r2.getPosition()));
         
         // Create array with robot data [position, totalProfit, numericType]
-        int[][] robotsArray = new int[sortedRobots.size()][3]; // Now with 3 columns
+        int[][] robotsArray = new int[sortedRobots.size()][3];
         
         for (int i = 0; i < sortedRobots.size(); i++) {
             Robot robot = sortedRobots.get(i);
@@ -1307,6 +1306,9 @@ public class SilkRoad {
                     break;
                 case "tender":
                     robotsArray[i][2] = 2;
+                    break;
+                case "lazy":
+                    robotsArray[i][2] = 3;
                     break;
                 default: // "normal" or others
                     robotsArray[i][2] = 0;
@@ -1867,7 +1869,7 @@ public class SilkRoad {
     
     /**
      * Places a store on the route with a specific type.
-     * Autonomous stores choose their own random position.
+     * Uses polymorphism to create the appropriate store subclass.
      * 
      * @param position the position of the store (ignored for autonomous type)
      * @param tenges the initial amount of tenges in the store
@@ -1875,7 +1877,6 @@ public class SilkRoad {
      */
     public void placeStore(int position, int tenges, String type) {
         try {
-            // Initial validations
             if (tenges < 0) {
                 lastActionSuccessful = false;
                 lastActionMessage = "Error: The amount of tenges cannot be negative";
@@ -1885,48 +1886,19 @@ public class SilkRoad {
             // Normalize type
             type = type.toLowerCase();
             
-            // If autonomous type, the store chooses its own position
-            int finalPosition = position; // Position that will finally be used
+            // Create the appropriate store subclass using polymorphism
+            Store store;
+            int finalPosition = position;
             
             if ("autonomous".equals(type)) {
-                // Find available positions (without stores)
-                ArrayList<Integer> availablePositions = new ArrayList<>();
-                for (int i = 0; i < length; i++) {
-                    boolean positionOccupied = false;
-                    for (Store s : stores) {
-                        if (s.getPosition() == i) {
-                            positionOccupied = true;
-                            break;
-                        }
-                    }
-                    if (!positionOccupied) {
-                        availablePositions.add(i);
-                    }
+                // Get occupied positions
+                ArrayList<Integer> occupiedPositions = new ArrayList<>();
+                for (Store s : stores) {
+                    occupiedPositions.add(s.getPosition());
                 }
                 
-                if (availablePositions.isEmpty()) {
-                    lastActionSuccessful = false;
-                    lastActionMessage = "Error: No available positions for autonomous store";
-                    return;
-                }
-                
-                // Autonomous store chooses a random available position
-                // Make sure not to use indicated position if possible
-                if (position >= 0 && position < length) {
-                    availablePositions.remove(Integer.valueOf(position));
-                    if (availablePositions.isEmpty()) {
-                        // If it was the only available position, we keep it
-                        finalPosition = position;
-                    } else {
-                        // Choose a different random position
-                        Random random = new Random();
-                        finalPosition = availablePositions.get(random.nextInt(availablePositions.size()));
-                    }
-                } else {
-                    // If original position is not valid, choose any of the available ones
-                    Random random = new Random();
-                    finalPosition = availablePositions.get(random.nextInt(availablePositions.size()));
-                }
+                store = new AutonomousStore(position, tenges, length, occupiedPositions);
+                finalPosition = store.getPosition();
             }
             else {
                 // For non-autonomous stores, validate the position
@@ -1945,11 +1917,14 @@ public class SilkRoad {
                     }
                 }
                 
-                finalPosition = position;
+                // Create the appropriate store type
+                if ("fighter".equals(type)) {
+                    store = new FighterStore(position, tenges);
+                } else {
+                    store = new NormalStore(position, tenges);
+                }
             }
             
-            // Create store with specified type
-            Store store = new Store(finalPosition, tenges, type);
             stores.add(store);
             
             // Get position on canvas and place the store
@@ -1969,8 +1944,9 @@ public class SilkRoad {
             lastActionSuccessful = true;
             String positionMessage = "autonomous".equals(type) && finalPosition != position ? 
                 "position randomly chosen: " + finalPosition : "position " + finalPosition;
-            lastActionMessage = "Store of type " + type + " successfully placed at " + 
-                               positionMessage + " with " + tenges + " tenges";
+            lastActionMessage = "Store of type " + store.getType() + 
+                               " successfully placed at " + positionMessage + 
+                               " with " + tenges + " tenges";
             
         } catch (NumberFormatException e) {
             lastActionSuccessful = false;
@@ -1980,10 +1956,10 @@ public class SilkRoad {
     
     /**
      * Places a robot on the route with a specific type.
-     * Robot types have different behaviors (normal, neverback, tender).
+     * Uses polymorphism to create the appropriate robot subclass.
      * 
      * @param position the initial position of the robot
-     * @param type the robot type: "normal", "neverback", "tender"
+     * @param type the robot type: "normal", "neverback", "tender", "lazy"
      */
     public void placeRobot(int position, String type) {
         try {
@@ -2002,8 +1978,26 @@ public class SilkRoad {
                 }
             }
             
-            // Create robot with specified type
-            Robot robot = new Robot(position, type, true); // Third parameter to use correct constructor
+            // Create the appropriate robot subclass using polymorphism
+            Robot robot;
+            type = type.toLowerCase();
+            
+            switch (type) {
+                case "neverback":
+                    robot = new NeverbackRobot(position);
+                    break;
+                case "tender":
+                    robot = new TenderRobot(position);
+                    break;
+                case "lazy":
+                    robot = new LazyRobot(position);
+                    break;
+                case "normal":
+                default:
+                    robot = new NormalRobot(position);
+                    break;
+            }
+            
             robots.add(robot);
             
             // Get position on canvas and place the robot
@@ -2024,7 +2018,8 @@ public class SilkRoad {
             updateHighestProfitRobot();
             
             lastActionSuccessful = true;
-            lastActionMessage = "Robot of type " + type + " successfully placed at position " + position;
+            lastActionMessage = "Robot of type " + robot.getType() + 
+                               " successfully placed at position " + position;
             
         } catch (NumberFormatException e) {
             lastActionSuccessful = false;

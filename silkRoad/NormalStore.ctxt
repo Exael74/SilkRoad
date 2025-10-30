@@ -1,0 +1,14 @@
+#BlueJ class context
+comment0.target=NormalStore
+comment0.text=\r\n\ Normal\ store\ that\ allows\ any\ robot\ to\ take\ tenges.\r\n\ \r\n\ @author\ Exael74\ (Github\ User\ for\ Stiven\ Pardo)\r\n\ @version\ 5.0\r\n
+comment1.params=position\ tenges
+comment1.target=NormalStore(int,\ int)
+comment1.text=\r\n\ Constructor\ for\ NormalStore.\r\n\ \r\n\ @param\ position\ store\ position\ on\ the\ route\r\n\ @param\ tenges\ initial\ amount\ of\ tenges\r\n
+comment2.params=
+comment2.target=java.lang.String\ selectRandomColor()
+comment2.text=\r\n\ Selects\ a\ random\ color\ for\ the\ store.\r\n\ \r\n\ @return\ a\ random\ color\ string\r\n
+comment3.params=
+comment3.target=java.lang.String\ getType()
+comment4.params=robot
+comment4.target=boolean\ canRobotTakeTenges(Robot)
+numComments=5
