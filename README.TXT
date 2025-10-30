@@ -1,12 +1,12 @@
 ------------------------------------------------------------------------
-This is the project README file. Here, you should describe your project.
-Tell the reader (someone who does not know anything about this project)
-all they need to know. The comments should usually include at least:
+This is the project README file. 
+This is the SilkRoad project made by Stiven Pardo
 ------------------------------------------------------------------------
 
-PROJECT TITLE:
-PURPOSE OF PROJECT:
-VERSION or DATE:
-HOW TO START THIS PROJECT:
-AUTHORS:
-USER INSTRUCTIONS:
+PROJECT TITLE: SilkRoad Project
+PURPOSE OF PROJECT: Academic Presentation
+VERSION or DATE: Version 4.0
+HOW TO START THIS PROJECT: by an academic assignament
+AUTHORS: Stiven Pardo (Exael74)
+USER INSTRUCTIONS: Use in Bluej, you can execute the simulator using the 
+SilkRoad class.
